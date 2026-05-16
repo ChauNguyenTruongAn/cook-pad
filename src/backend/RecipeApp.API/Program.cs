@@ -49,6 +49,17 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173") // Đổi lại đúng URL của React App nếu bạn dùng port khác
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials(); // Cần thiết nếu sau này bạn dùng Cookie/Session
+    });
+});
+
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -64,9 +75,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("AllowReactApp"); // Bật CORS với policy đã định nghĩa
 app.UseAuthentication(); // Bật Authentication middleware
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();
