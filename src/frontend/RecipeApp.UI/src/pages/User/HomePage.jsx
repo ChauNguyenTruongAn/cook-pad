@@ -21,6 +21,7 @@ export const HomePage = () => {
       try {
         // 1. Lấy dữ liệu tổng hợp từ API Home
         const response = await apiClient.get("/api/features/home");
+        const sponsorResp = await apiClient.get("/api/features/home/init");
 
         setHomeData({
           // Cắt đúng 3 món nổi bật nhất để làm Bảng xếp hạng Top 3
@@ -29,15 +30,12 @@ export const HomePage = () => {
           hotTags: response.data.hotTags,
         });
 
-        // 2. Tương lai: Gọi API lấy bài tài trợ (Mockup tạm thời)
-        // const sponsorRes = await apiClient.get("/api/features/sponsored");
-        // setSponsoredContent(sponsorRes.data);
+        const sponsor = sponsorResp.data.activeBanner;
         setSponsoredContent({
-          title: "Sốt Ướp Thịt Nướng Barbecue Đậm Vị",
-          brand: "Tài trợ bởi Chinsu",
-          imageUrl:
-            "https://images.unsplash.com/photo-1495195129352-aeb325a55b65?auto=format&fit=crop&w=800",
-          link: "/search?tag=thit-nuong",
+          title: sponsor.title,
+          brand: sponsor.brandName,
+          imageUrl: sponsor.imageUrl,
+          link: sponsor.targetUrl,
         });
       } catch (error) {
         console.error("Lỗi khi tải dữ liệu trang chủ:", error);
@@ -156,11 +154,19 @@ export const HomePage = () => {
       {sponsoredContent && (
         <section
           className="home-section sponsored-section animation-slide-up"
-          style={{ animationDelay: "0.2s" }}
+          style={{ marginBottom: "40px" }}
         >
           <div
             className="sponsored-banner"
-            onClick={() => navigate(sponsoredContent.link)}
+            onClick={() => {
+              // Nếu link nội bộ thì navigate, nếu link ngoài thì open tab mới
+              if (sponsoredContent.link.startsWith("http")) {
+                window.open(sponsoredContent.link, "_blank");
+              } else {
+                navigate(sponsoredContent.link);
+              }
+            }}
+            style={{ cursor: "pointer" }}
           >
             <img
               src={sponsoredContent.imageUrl}
